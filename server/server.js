@@ -5,6 +5,7 @@ import connectDB from "./configs/mongodb.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import relatoriosRouter from "./routes/relatoriosRouter.js";
 import authRouter from "./routes/authRouter.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,7 +16,7 @@ await connectCloudinary();
 
 //middlewares
 app.use(cors());
-// app.use(clerkMiddleware());
+app.use(cookieParser());
 app.use(express.json());
 
 //routes
