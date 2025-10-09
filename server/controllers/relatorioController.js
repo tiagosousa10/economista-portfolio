@@ -13,6 +13,7 @@ export const obterRelatorios = async (req, res) => {
       relatorio: relatorioDocument,
     });
   } catch (error) {
+    console.log("Error in obterRelatorios,", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -31,6 +32,7 @@ export const obterRelatorio = async (req, res) => {
       relatorio: relatorioDocument,
     });
   } catch (error) {
+    console.log("Error in obterRelatorio,", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -52,6 +54,7 @@ export const criarRelatorio = async (req, res) => {
       relatorio: created,
     });
   } catch (error) {
+    console.log("Error in criarRelatorio,", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -86,6 +89,7 @@ export const atualizarRelatorio = async (req, res) => {
       message: "Relatorio atualizado com sucesso!",
     });
   } catch (error) {
+    console.log("Error in atualizarRelatorio,", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -103,6 +107,7 @@ export const removerRelatorio = async (req, res) => {
 
     return res.json({ success: true, message: "Relatorio removido" });
   } catch (error) {
+    console.log("Error in removerRelatorio,", error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
