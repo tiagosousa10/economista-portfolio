@@ -2,7 +2,6 @@ import Relatorio from "../models/relatorioModel.js";
 
 export const obterRelatorios = async (req, res) => {
   try {
-    //todo: verificar utilizador clerk
     const relatorioDocument = await Relatorio.find({});
     if (!relatorioDocument)
       return res.json({ success: false, message: "Relatorio não encontrado" });
@@ -21,7 +20,7 @@ export const obterRelatorios = async (req, res) => {
 export const obterRelatorio = async (req, res) => {
   try {
     const { id } = req.params;
-    //todo: verificar utilizador clerk
+
     const relatorioDocument = await Relatorio.findById(id);
     if (!relatorioDocument)
       return res.json({ success: false, message: "Relatorio nao encontrado" });
@@ -39,13 +38,26 @@ export const obterRelatorio = async (req, res) => {
 
 export const criarRelatorio = async (req, res) => {
   try {
+    //todo: verificar utilizador
+    const currentUserId = req.user._id;
+
+    if (!currentUserId)
+      return res.json({ success: false, message: "Utilizador nao encontrado" });
+
     const { titulo, resumo, texto } = req.body;
-    //todo: verificar utilizador clerk
+
+    if (!titulo || !resumo || !texto)
+      return res.json({
+        success: false,
+        message: "Todos os campos obrigatorios",
+      });
+
     //criar relatorio
     const created = await Relatorio.create({
       titulo,
       resumo,
       texto,
+      user: currentUserId,
     });
 
     return res.status(201).json({
@@ -61,13 +73,30 @@ export const criarRelatorio = async (req, res) => {
 
 export const atualizarRelatorio = async (req, res) => {
   try {
+    //  verificar utilizador
+    const currentUserId = req.user._id;
+
+    if (!currentUserId)
+      return res.json({ success: false, message: "Utilizador nao encontrado" });
+
     const { id } = req.params;
+
+    if (!id) return res.json({ success: false, message: "Id nao fornecido" });
     const { titulo, resumo, texto } = req.body;
 
-    //todo: verificar utilizador clerk
+    if (!titulo || !resumo || !texto)
+      return res.json({
+        success: false,
+        message: "Todos os campos obrigatorios",
+      });
+
     const relatorioDocument = await Relatorio.findById(id);
     if (!relatorioDocument)
       return res.json({ success: false, message: "Relatorio nao encontrado" });
+
+    if (relatorioDocument.user.toString() !== currentUserId.toString()) {
+      return res.status(403).json({ success: false, message: "Sem permissão" });
+    }
 
     //atualizar relatorio
     const updated = await Relatorio.findByIdAndUpdate(
@@ -77,6 +106,7 @@ export const atualizarRelatorio = async (req, res) => {
           titulo: titulo,
           resumo: resumo,
           texto: texto,
+          user: currentUserId,
         },
       }
     );
@@ -96,12 +126,21 @@ export const atualizarRelatorio = async (req, res) => {
 
 export const removerRelatorio = async (req, res) => {
   try {
-    //todo: verificar utilizador clerk
-    const { id } = req.params;
-    const relatorioDocument = await Relatorio.findById(id);
+    // verificar utilizador
+    const currentUserId = req.user._id;
+    if (!currentUserId)
+      return res.json({ success: false, message: "Utilizador nao encontrado" });
 
+    const { id } = req.params;
+    if (!id) return res.json({ success: false, message: "Id nao fornecido" });
+
+    const relatorioDocument = await Relatorio.findById(id);
     if (!relatorioDocument)
       return res.json({ success: false, message: "Relatorio não encontrado" });
+
+    if (relatorioDocument.user.toString() !== currentUserId.toString()) {
+      return res.status(403).json({ success: false, message: "Sem permissão" });
+    }
 
     await Relatorio.deleteOne({ _id: id });
 

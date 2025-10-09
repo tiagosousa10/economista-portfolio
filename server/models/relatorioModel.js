@@ -19,6 +19,11 @@ const relatorioSchema = new mongoose.Schema(
     figuraUrl: {
       type: String,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // nome do model User
+      required: true,
+    },
   },
   { timestamps: true }
 ); // createdAt, updatedAt
