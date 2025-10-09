@@ -6,13 +6,14 @@ import {
   atualizarRelatorio,
   removerRelatorio,
 } from "../controllers/relatorioController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 const relatoriosRouter = express.Router();
 // #todo: middleware de autenticaçao
 
 relatoriosRouter.get("/", obterRelatorios);
 relatoriosRouter.get("/:id", obterRelatorio);
-relatoriosRouter.post("/", criarRelatorio);
-relatoriosRouter.put("/:id", atualizarRelatorio);
-relatoriosRouter.delete("/:id", removerRelatorio);
+relatoriosRouter.post("/", authMiddleware, criarRelatorio);
+relatoriosRouter.put("/:id", authMiddleware, atualizarRelatorio);
+relatoriosRouter.delete("/:id", authMiddleware, removerRelatorio);
 
 export default relatoriosRouter;

@@ -1,17 +1,36 @@
 import { clerkClient } from "@clerk/express";
+import jwt from "jsonwebtoken";
+import User from "../models/userModel.js";
 
 //Middleware TODO: adicionar o clerk
 export const authMiddleware = async (req, res, next) => {
   try {
-    const userId = req.auth.userId;
-    if (!userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+    const token = req.cookies.jwt;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Não autorizado. Token nao fornecido" });
     }
-    const response = await clerkClient.users.getUser(userId); //get user from clerk
+
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    if (!decoded) {
+      return res.status(401).json({ message: "Token nao valido" });
+    }
+
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Utilizador nao encontrado" });
+    }
+
+    // Attach the user object to the request
+    req.user = user;
 
     next();
   } catch (error) {
-    res.json({ success: false, message: error.message });
-    console.log("Error in authMiddleware,", error.message);
+    console.log("Error in protectRoute middleware", error);
+    res.status(500).json({ message: error.message });
   }
 };

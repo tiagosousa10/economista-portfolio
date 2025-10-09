@@ -1,16 +1,16 @@
 import express from "express";
-// import { protectRoute } from "../middleware/auth.middleware.js";
-import { login, signup } from "../controllers/authController.js";
+import { login, logout, signup } from "../controllers/authController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
-// router.post("/logout", logout);
+router.post("/logout", logout);
 
-//check if user is logged in
-// router.get("/me", protectRoute, (req, res) => {
-//   res.status(200).json({ success: true, user: req.user }); // user is attached to req by auth middleware
-// });
+// check if user is logged in
+router.get("/me", authMiddleware, (req, res) => {
+  res.status(200).json({ success: true, user: req.user }); // user is attached to req by auth middleware
+});
 
 export default router;

@@ -48,13 +48,11 @@ export async function signup(req, res) {
       secure: process.env.NODE_ENV === "production", //only send cookie over https in production
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Utilizador criado com sucesso!",
-        user: newUser,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Utilizador criado com sucesso!",
+      user: newUser,
+    });
   } catch (error) {
     console.log("Erro ao fazer signup", error);
     res.status(500).json({ message: error.message });
@@ -99,4 +97,9 @@ export async function login(req, res) {
     console.log("Erro ao realizar login.", error);
     res.status(500).json({ message: error.message });
   }
+}
+
+export async function logout(req, res) {
+  res.clearCookie("jwt"); // name of the cookie
+  res.status(200).json({ success: true, message: "Successfully logged out" });
 }
