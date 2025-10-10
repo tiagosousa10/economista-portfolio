@@ -60,20 +60,20 @@ const postsBase = [
     lang: "pt",
   },
   {
-   id: "public-debt-analise-2025",
-   isoDate: "2025-09-03",
-   title: {
-     pt: "Dívida Pública Global: Tendências, Riscos e Sustentabilidade",
-     en: "Global Public Debt: Trends, Risks and Sustainability",
+    id: "public-debt-analise-2025",
+    isoDate: "2025-09-03",
+    title: {
+      pt: "Dívida Pública Global: Tendências, Riscos e Sustentabilidade",
+      en: "Global Public Debt: Trends, Risks and Sustainability",
     },
-  summary: {
-     pt: "Análise da evolução da dívida pública mundial com base nos dados do FMI, destacando projeções, riscos e sustentabilidade fiscal.",
-     en: "Analysis of the evolution of global public debt based on IMF data, highlighting projections, risks, and fiscal sustainability.",
+    summary: {
+      pt: "Análise da evolução da dívida pública mundial com base nos dados do FMI, destacando projeções, riscos e sustentabilidade fiscal.",
+      en: "Analysis of the evolution of global public debt based on IMF data, highlighting projections, risks, and fiscal sustainability.",
     },
     url: "/analises/public-debt-2025",
     tags: ["Dívida Pública", "Macroeconomia"],
     lang: "pt",
-  }
+  },
 ];
 
 const skills = [
@@ -95,7 +95,12 @@ const languagesList = [
 const DICT = {
   pt: {
     brand: "Vítor Reis",
-    nav: { sobre: "Sobre", cv: "CV", analises: "Notas de Realidade", contacto: "Contacto" },
+    nav: {
+      sobre: "Sobre",
+      cv: "CV",
+      analises: "Notas de Realidade",
+      contacto: "Contacto",
+    },
     hero: {
       title: "Vítor Reis",
       blurb:
@@ -152,7 +157,12 @@ const DICT = {
   },
   en: {
     brand: "Vítor Reis",
-    nav: { sobre: "About", cv: "CV", analises: "Reality Notes", contacto: "Contact" },
+    nav: {
+      sobre: "About",
+      cv: "CV",
+      analises: "Reality Notes",
+      contacto: "Contact",
+    },
     hero: {
       title: "Vítor Reis",
       blurb:
@@ -216,7 +226,9 @@ const Container = ({ children }) => (
 const Section = ({ id, title, icon: Icon, children, altBg = false }) => (
   <section
     id={id}
-    className={`scroll-mt-24 py-12 ${altBg ? "bg-neutral-50 dark:bg-neutral-900" : ""}`}
+    className={`scroll-mt-24 py-12 ${
+      altBg ? "bg-neutral-50 dark:bg-neutral-900" : ""
+    }`}
   >
     <Container>
       <div className="flex items-center gap-3 mb-6">
@@ -283,7 +295,9 @@ function useI18n() {
   const [lang, setLang] = useLocalStorage("lang", getInitial());
   const t = (path) => {
     const parts = path.split(".");
-    return parts.reduce((acc, p) => (acc ? acc[p] : undefined), DICT[lang]) ?? path;
+    return (
+      parts.reduce((acc, p) => (acc ? acc[p] : undefined), DICT[lang]) ?? path
+    );
   };
   return { lang, setLang, t };
 }
@@ -459,7 +473,11 @@ const Nav = ({ onToggleTheme, dark, lang, setLang, t, active }) => {
               aria-label={t("ui.theme")}
               className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-800 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950"
             >
-              {dark ? <Sun className="w-4 h-4" aria-hidden /> : <Moon className="w-4 h-4" aria-hidden />}
+              {dark ? (
+                <Sun className="w-4 h-4" aria-hidden />
+              ) : (
+                <Moon className="w-4 h-4" aria-hidden />
+              )}
             </button>
             <button
               onClick={toggleLang}
@@ -469,7 +487,11 @@ const Nav = ({ onToggleTheme, dark, lang, setLang, t, active }) => {
               {DICT[lang].langLabel}
             </button>
           </nav>
-          <button className="md:hidden p-2" onClick={() => setOpen((o) => !o)} aria-label="Menu">
+          <button
+            className="md:hidden p-2"
+            onClick={() => setOpen((o) => !o)}
+            aria-label="Menu"
+          >
             {open ? <X aria-hidden /> : <Menu aria-hidden />}
           </button>
         </div>
@@ -489,7 +511,11 @@ const Nav = ({ onToggleTheme, dark, lang, setLang, t, active }) => {
                 onClick={onToggleTheme}
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950"
               >
-                {dark ? <Sun className="w-4 h-4" aria-hidden /> : <Moon className="w-4 h-4" aria-hidden />}
+                {dark ? (
+                  <Sun className="w-4 h-4" aria-hidden />
+                ) : (
+                  <Moon className="w-4 h-4" aria-hidden />
+                )}
                 <span>{t("ui.theme")}</span>
               </button>
               <button
@@ -515,7 +541,9 @@ const Hero = ({ t }) => (
           <h1 className="text-3xl md:text-4xl font-semibold leading-tight text-blue-700 dark:text-blue-400">
             {t("hero.title")}
           </h1>
-          <p className="mt-4 text-neutral-700 dark:text-neutral-200">{t("hero.blurb")}</p>
+          <p className="mt-4 text-neutral-700 dark:text-neutral-200">
+            {t("hero.blurb")}
+          </p>
           <div className="mt-6 flex flex-wrap gap-3 justify-center md:justify-start">
             <a
               href={links.cv}
@@ -523,13 +551,15 @@ const Hero = ({ t }) => (
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950"
               rel="nofollow noopener"
             >
-              <Download className="w-4 h-4" aria-hidden /> {t("hero.downloadCV")}
+              <Download className="w-4 h-4" aria-hidden />{" "}
+              {t("hero.downloadCV")}
             </a>
             <a
               href="#analises"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950"
             >
-              <Newspaper className="w-4 h-4" aria-hidden /> {t("hero.viewAnalyses")}
+              <Newspaper className="w-4 h-4" aria-hidden />{" "}
+              {t("hero.viewAnalyses")}
             </a>
             <a
               href={links.linkedin}
@@ -606,7 +636,9 @@ const SecAnalises = ({ t, lang, posts }) => (
   <Section id="analises" title={t("posts.title")} icon={Newspaper} altBg>
     {posts.length === 0 ? (
       <Card>
-        <p className="text-sm text-neutral-700 dark:text-neutral-200">{t("posts.empty")}</p>
+        <p className="text-sm text-neutral-700 dark:text-neutral-200">
+          {t("posts.empty")}
+        </p>
       </Card>
     ) : (
       <div className="grid gap-6 md:grid-cols-2">
@@ -635,12 +667,12 @@ const SecAnalises = ({ t, lang, posts }) => (
                 ? p.summary
                 : p.summary[lang] || p.summary.pt || p.summary.en}
             </p>
-          <Link
-            to={p.url}
-            className="mt-3 inline-flex text-sm underline underline-offset-4"
+            <Link
+              to={p.url}
+              className="mt-3 inline-flex text-sm underline underline-offset-4"
             >
-           {t("posts.readMore")}
-         </Link>
+              {t("posts.readMore")}
+            </Link>
           </Card>
         ))}
       </div>
@@ -649,7 +681,12 @@ const SecAnalises = ({ t, lang, posts }) => (
 );
 
 const SecContacto = ({ t, lang }) => {
-  const [form, setForm] = useState({ name: "", email: "", message: "", company: "" }); // honeypot
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    message: "",
+    company: "",
+  }); // honeypot
   const [status, setStatus] = useState(null);
 
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -663,7 +700,8 @@ const SecContacto = ({ t, lang }) => {
     }
     setStatus("ok");
     const subject =
-      (lang === "pt" ? "Contacto via site — " : "Website contact — ") + form.name;
+      (lang === "pt" ? "Contacto via site — " : "Website contact — ") +
+      form.name;
     const body = `${form.message}\n\n— ${form.name}\n${form.email}`;
     window.location.href = `mailto:vitor17reis@gmail.com?subject=${encodeURIComponent(
       subject
@@ -703,7 +741,9 @@ const SecContacto = ({ t, lang }) => {
               type="email"
               name="email"
               required
-              aria-invalid={status === "error" && !form.email ? true : undefined}
+              aria-invalid={
+                status === "error" && !form.email ? true : undefined
+              }
               className="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder={t("contact.placeholderEmail")}
               value={form.email}
@@ -719,7 +759,9 @@ const SecContacto = ({ t, lang }) => {
               name="message"
               rows={5}
               required
-              aria-invalid={status === "error" && !form.message ? true : undefined}
+              aria-invalid={
+                status === "error" && !form.message ? true : undefined
+              }
               className="w-full rounded-xl border border-neutral-300 dark:border-neutral-700 bg-transparent px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder={t("contact.placeholderMsg")}
               value={form.message}
@@ -792,7 +834,8 @@ const Footer = ({ t }) => (
     <Container>
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         <div>
-          © {new Date().getFullYear()} Vítor Reis — Porto, PT. {t("footer.rights")}
+          © {new Date().getFullYear()} Vítor Reis — Porto, PT.{" "}
+          {t("footer.rights")}
         </div>
         <div className="flex items-center gap-4">
           <a href="#sobre" className="underline underline-offset-4">
@@ -809,6 +852,7 @@ const Footer = ({ t }) => (
     </Container>
   </footer>
 );
+
 export default function EconomistaSiteBase() {
   const { dark, setDark } = useTheme();
   const { lang, setLang, t } = useI18n();
