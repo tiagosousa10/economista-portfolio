@@ -14,10 +14,7 @@ const PORT = process.env.PORT || 3000;
 await connectDB();
 await connectCloudinary();
 
-const allowed = [
-  "http://localhost:5173",
-  "https://economista-portfolio-client.vercel.app",
-];
+const allowed = ["https://economista-portfolio-client.vercel.app"];
 
 //middlewares
 app.use(
