@@ -103,3 +103,32 @@ export async function logout(req, res) {
   res.clearCookie("jwt"); // name of the cookie
   res.status(200).json({ success: true, message: "Successfully logged out" });
 }
+
+export async function verify(req, res) {
+  try {
+    const token = req.cookies.jwt;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Token não encontrado" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Utilizador não encontrado" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Token válido",
+      user: user,
+    });
+  } catch (error) {
+    res.status(401).json({ success: false, message: "Token inválido" });
+  }
+}

@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "../lib/axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const AdmingPage = () => {
   const [relatorios, setRelatorios] = useState([]);
@@ -28,7 +30,7 @@ const AdmingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [activeSection, setActiveSection] = useState("relatorios");
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingRelatorio, setEditingRelatorio] = useState(null);
@@ -37,6 +39,10 @@ const AdmingPage = () => {
     resumo: "",
     texto: "",
   });
+  const [newFiguraFile, setNewFiguraFile] = useState(null);
+  const [newFiguraPreview, setNewFiguraPreview] = useState(null);
+  const [editFiguraFile, setEditFiguraFile] = useState(null);
+  const [editFiguraPreview, setEditFiguraPreview] = useState(null);
   const navigate = useNavigate();
 
   // Verificar tema atual
@@ -97,11 +103,18 @@ const AdmingPage = () => {
   const handleCreateRelatorio = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("api/relatorios", newRelatorio);
+      const fd = new FormData();
+      fd.append("titulo", newRelatorio.titulo);
+      fd.append("resumo", newRelatorio.resumo);
+      fd.append("texto", newRelatorio.texto);
+      if (newFiguraFile) fd.append("figura", newFiguraFile);
+      const response = await api.post("api/relatorios", fd);
       if (response.data.success) {
         toast.success("Relatório criado com sucesso!");
         setShowCreateModal(false);
         setNewRelatorio({ titulo: "", resumo: "", texto: "" });
+        setNewFiguraFile(null);
+        setNewFiguraPreview(null);
         fetchRelatorios();
       }
     } catch (error) {
@@ -112,14 +125,20 @@ const AdmingPage = () => {
   const handleEditRelatorio = async (e) => {
     e.preventDefault();
     try {
+      const fd = new FormData();
+      fd.append("titulo", editingRelatorio.titulo);
+      fd.append("resumo", editingRelatorio.resumo);
+      fd.append("texto", editingRelatorio.texto);
+      if (editFiguraFile) fd.append("figura", editFiguraFile);
       const response = await api.put(
         `api/relatorios/${editingRelatorio._id}`,
-        editingRelatorio
+        fd
       );
       if (response.data.success) {
         toast.success("Relatório atualizado com sucesso!");
         setShowEditModal(false);
         setEditingRelatorio(null);
+        setEditFiguraFile(null);
         fetchRelatorios();
       }
     } catch (error) {
@@ -147,6 +166,8 @@ const AdmingPage = () => {
 
   const openEditModal = (relatorio) => {
     setEditingRelatorio({ ...relatorio });
+    setEditFiguraFile(null);
+    setEditFiguraPreview(relatorio.figuraUrl || null);
     setShowEditModal(true);
   };
 
@@ -544,18 +565,46 @@ const AdmingPage = () => {
                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Texto
                     </label>
-                    <textarea
-                      required
-                      rows={6}
-                      value={newRelatorio.texto}
-                      onChange={(e) =>
-                        setNewRelatorio({
-                          ...newRelatorio,
-                          texto: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-transparent text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <div className="border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-900">
+                      <ReactQuill
+                        theme="snow"
+                        value={newRelatorio.texto}
+                        onChange={(val) =>
+                          setNewRelatorio({ ...newRelatorio, texto: val })
+                        }
+                        placeholder="Escreva o conteúdo do relatório..."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                      Imagem (opcional)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        setNewFiguraFile(file || null);
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () =>
+                            setNewFiguraPreview(reader.result);
+                          reader.readAsDataURL(file);
+                        } else {
+                          setNewFiguraPreview(null);
+                        }
+                      }}
+                      className="block w-full text-sm text-neutral-700 dark:text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
+                    {newFiguraPreview && (
+                      <img
+                        src={newFiguraPreview}
+                        alt="Pré-visualização"
+                        className="mt-3 max-h-48 rounded-xl border border-neutral-200 dark:border-neutral-700"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -638,18 +687,46 @@ const AdmingPage = () => {
                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                       Texto
                     </label>
-                    <textarea
-                      required
-                      rows={6}
-                      value={editingRelatorio.texto}
-                      onChange={(e) =>
-                        setEditingRelatorio({
-                          ...editingRelatorio,
-                          texto: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-xl bg-transparent text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <div className="border border-neutral-300 dark:border-neutral-600 rounded-xl bg-white dark:bg-neutral-900">
+                      <ReactQuill
+                        theme="snow"
+                        value={editingRelatorio.texto}
+                        onChange={(val) =>
+                          setEditingRelatorio({
+                            ...editingRelatorio,
+                            texto: val,
+                          })
+                        }
+                        placeholder="Edite o conteúdo do relatório..."
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                      Imagem (opcional)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        setEditFiguraFile(file || null);
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () =>
+                            setEditFiguraPreview(reader.result);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="block w-full text-sm text-neutral-700 dark:text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
+                    {(editFiguraPreview || editingRelatorio.figuraUrl) && (
+                      <img
+                        src={editFiguraPreview || editingRelatorio.figuraUrl}
+                        alt="Pré-visualização"
+                        className="mt-3 max-h-48 rounded-xl border border-neutral-200 dark:border-neutral-700"
+                      />
+                    )}
                   </div>
                 </div>
 

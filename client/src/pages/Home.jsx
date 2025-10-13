@@ -12,8 +12,11 @@ import {
   Newspaper,
   User,
   Globe,
+  Calendar,
+  ArrowRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { api } from "../lib/axios";
 
 // ==========================
 // Website — Vítor Reis — PRONTO A COLAR
@@ -27,7 +30,7 @@ const links = {
   siteOrigin: typeof window !== "undefined" ? window.location.origin : "",
 };
 
-// Exemplo de posts
+// Posts estáticos (fallback se não houver relatórios da API)
 const postsBase = [
   {
     id: "dxy-analise-2025",
@@ -632,49 +635,90 @@ const SecCV = ({ t }) => (
   </Section>
 );
 
-const SecAnalises = ({ t, lang, posts }) => (
+const SecAnalises = ({ t, lang, posts, relatorios, isLoading }) => (
   <Section id="analises" title={t("posts.title")} icon={Newspaper} altBg>
-    {posts.length === 0 ? (
+    {isLoading ? (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    ) : relatorios.length === 0 && posts.length === 0 ? (
       <Card>
         <p className="text-sm text-neutral-700 dark:text-neutral-200">
           {t("posts.empty")}
         </p>
       </Card>
     ) : (
-      <div className="grid gap-6 md:grid-cols-2">
-        {posts.map((p) => (
-          <Card key={p.id}>
-            <div className="flex items-center gap-2 text-xs text-neutral-500">
-              <time dateTime={p.isoDate}>{fmtDate(p.isoDate, lang)}</time>
-              {p.tags?.length > 0 && (
-                <span className="px-2 py-0.5 rounded-full border border-neutral-200 dark:border-neutral-800">
-                  {p.tags[0]}
-                </span>
-              )}
-              {p.lang && (
-                <span className="px-2 py-0.5 rounded-full border border-neutral-200 dark:border-neutral-800">
-                  {p.lang.toUpperCase()}
-                </span>
-              )}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Relatórios da API */}
+        {relatorios.map((relatorio) => (
+          <Card key={relatorio._id}>
+            {relatorio.figuraUrl && (
+              <div className="mb-4">
+                <img
+                  src={relatorio.figuraUrl}
+                  alt={relatorio.titulo}
+                  className="w-full h-48 object-cover rounded-xl"
+                />
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-xs text-neutral-500 mb-2">
+              <Calendar className="w-4 h-4" />
+              <time dateTime={relatorio.createdAt}>
+                {fmtDate(relatorio.createdAt, lang)}
+              </time>
             </div>
-            <h3 className="mt-2 font-medium leading-snug">
-              {typeof p.title === "string"
-                ? p.title
-                : p.title[lang] || p.title.pt || p.title.en}
+            <h3 className="font-medium leading-snug mb-2">
+              {relatorio.titulo}
             </h3>
-            <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-200">
-              {typeof p.summary === "string"
-                ? p.summary
-                : p.summary[lang] || p.summary.pt || p.summary.en}
+            <p className="text-sm text-neutral-700 dark:text-neutral-200 line-clamp-3">
+              {relatorio.resumo}
             </p>
             <Link
-              to={p.url}
-              className="mt-3 inline-flex text-sm underline underline-offset-4"
+              to={`/relatorio/${relatorio._id}`}
+              className="mt-3 inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
             >
               {t("posts.readMore")}
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </Card>
         ))}
+
+        {/* Posts estáticos (fallback) */}
+        {relatorios.length === 0 &&
+          posts.map((p) => (
+            <Card key={p.id}>
+              <div className="flex items-center gap-2 text-xs text-neutral-500 mb-2">
+                <time dateTime={p.isoDate}>{fmtDate(p.isoDate, lang)}</time>
+                {p.tags?.length > 0 && (
+                  <span className="px-2 py-0.5 rounded-full border border-neutral-200 dark:border-neutral-800">
+                    {p.tags[0]}
+                  </span>
+                )}
+                {p.lang && (
+                  <span className="px-2 py-0.5 rounded-full border border-neutral-200 dark:border-neutral-800">
+                    {p.lang.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <h3 className="font-medium leading-snug mb-2">
+                {typeof p.title === "string"
+                  ? p.title
+                  : p.title[lang] || p.title.pt || p.title.en}
+              </h3>
+              <p className="text-sm text-neutral-700 dark:text-neutral-200 line-clamp-3">
+                {typeof p.summary === "string"
+                  ? p.summary
+                  : p.summary[lang] || p.summary.pt || p.summary.en}
+              </p>
+              <Link
+                to={p.url}
+                className="mt-3 inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                {t("posts.readMore")}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Card>
+          ))}
       </div>
     )}
   </Section>
@@ -857,10 +901,30 @@ export default function EconomistaSiteBase() {
   const { dark, setDark } = useTheme();
   const { lang, setLang, t } = useI18n();
   const active = useActiveSection();
+  const [relatorios, setRelatorios] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useHtmlLang(lang);
   useSeo(lang, t);
   useJsonLdPerson(lang);
+
+  // Buscar relatórios da API
+  useEffect(() => {
+    const fetchRelatorios = async () => {
+      try {
+        const response = await api.get("api/relatorios");
+        if (response.data.success) {
+          setRelatorios(response.data.relatorio);
+        }
+      } catch (error) {
+        console.log("Erro ao carregar relatórios:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRelatorios();
+  }, []);
 
   // Filtra posts conforme idioma com fallback
   const posts = useMemo(() => {
@@ -910,7 +974,13 @@ export default function EconomistaSiteBase() {
           </Container>
         </Section>
         <SecCV t={t} />
-        <SecAnalises t={t} lang={lang} posts={posts} />
+        <SecAnalises
+          t={t}
+          lang={lang}
+          posts={posts}
+          relatorios={relatorios}
+          isLoading={isLoading}
+        />
         <SecContacto t={t} lang={lang} />
       </main>
       <Footer t={t} />
