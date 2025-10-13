@@ -62,7 +62,7 @@ const AdmingPage = () => {
 
   const fetchRelatorios = async () => {
     try {
-      const response = await api.get("/relatorios");
+      const response = await api.get("api/relatorios");
       if (response.data.success) {
         setRelatorios(response.data.relatorio);
       }
@@ -86,7 +86,7 @@ const AdmingPage = () => {
 
   const handleLogout = async () => {
     try {
-      await api.post("/auth/logout");
+      await api.post("api/auth/logout");
       toast.success("Logout efetuado com sucesso!");
       navigate("/");
     } catch (error) {
@@ -97,7 +97,7 @@ const AdmingPage = () => {
   const handleCreateRelatorio = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/relatorios", newRelatorio);
+      const response = await api.post("api/relatorios", newRelatorio);
       if (response.data.success) {
         toast.success("Relatório criado com sucesso!");
         setShowCreateModal(false);
@@ -113,7 +113,7 @@ const AdmingPage = () => {
     e.preventDefault();
     try {
       const response = await api.put(
-        `/relatorios/${editingRelatorio._id}`,
+        `api/relatorios/${editingRelatorio._id}`,
         editingRelatorio
       );
       if (response.data.success) {
@@ -132,7 +132,7 @@ const AdmingPage = () => {
   const handleDeleteRelatorio = async (id) => {
     if (window.confirm("Tem certeza que deseja remover este relatório?")) {
       try {
-        const response = await api.delete(`/relatorios/${id}`);
+        const response = await api.delete(`api/relatorios/${id}`);
         if (response.data.success) {
           toast.success("Relatório removido com sucesso!");
           fetchRelatorios();

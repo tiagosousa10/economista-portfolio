@@ -45,7 +45,7 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/auth/login", formData);
+      const response = await api.post("api/auth/login", formData);
 
       if (response.data.success) {
         toast.success("Login efetuado com sucesso!");
