@@ -1,4 +1,6 @@
 import Relatorio from "../models/relatorioModel.js";
+import { v2 as cloudinary } from "cloudinary";
+import stream from "stream";
 
 export const obterRelatorios = async (req, res) => {
   try {
@@ -52,11 +54,33 @@ export const criarRelatorio = async (req, res) => {
         message: "Todos os campos obrigatorios",
       });
 
+    let figuraUrl;
+    let figuraPublicId;
+
+    if (req.file && req.file.buffer) {
+      const bufferStream = new stream.PassThrough();
+      bufferStream.end(req.file.buffer);
+      const uploadResult = await new Promise((resolve, reject) => {
+        const upload = cloudinary.uploader.upload_stream(
+          { folder: "relatorios" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        bufferStream.pipe(upload);
+      });
+      figuraUrl = uploadResult.secure_url;
+      figuraPublicId = uploadResult.public_id;
+    }
+
     //criar relatorio
     const created = await Relatorio.create({
       titulo,
       resumo,
       texto,
+      figuraUrl,
+      figuraPublicId,
       user: currentUserId,
     });
 
@@ -98,17 +122,47 @@ export const atualizarRelatorio = async (req, res) => {
       return res.status(403).json({ success: false, message: "Sem permissão" });
     }
 
+    // preparar updates
+    const updateSet = {
+      titulo: titulo,
+      resumo: resumo,
+      texto: texto,
+      user: currentUserId,
+    };
+
+    // se chegou nova figura, fazer upload e apagar a anterior se existir
+    if (req.file && req.file.buffer) {
+      // apaga anterior
+      if (relatorioDocument.figuraPublicId) {
+        try {
+          await cloudinary.uploader.destroy(relatorioDocument.figuraPublicId);
+        } catch (err) {
+          // mantém processamento mesmo que falhe apagar
+          console.log("Cloudinary destroy error:", err.message);
+        }
+      }
+
+      const bufferStream = new stream.PassThrough();
+      bufferStream.end(req.file.buffer);
+      const uploadResult = await new Promise((resolve, reject) => {
+        const upload = cloudinary.uploader.upload_stream(
+          { folder: "relatorios" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        bufferStream.pipe(upload);
+      });
+
+      updateSet.figuraUrl = uploadResult.secure_url;
+      updateSet.figuraPublicId = uploadResult.public_id;
+    }
+
     //atualizar relatorio
     const updated = await Relatorio.findByIdAndUpdate(
       { _id: id },
-      {
-        $set: {
-          titulo: titulo,
-          resumo: resumo,
-          texto: texto,
-          user: currentUserId,
-        },
-      }
+      { $set: updateSet }
     );
 
     if (!updated)
@@ -140,6 +194,15 @@ export const removerRelatorio = async (req, res) => {
 
     if (relatorioDocument.user.toString() !== currentUserId.toString()) {
       return res.status(403).json({ success: false, message: "Sem permissão" });
+    }
+
+    // remover figura do cloudinary se existir
+    if (relatorioDocument.figuraPublicId) {
+      try {
+        await cloudinary.uploader.destroy(relatorioDocument.figuraPublicId);
+      } catch (err) {
+        console.log("Cloudinary destroy error:", err.message);
+      }
     }
 
     await Relatorio.deleteOne({ _id: id });

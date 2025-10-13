@@ -72,12 +72,12 @@ export async function login(req, res) {
     const user = await User.findOne({ email });
 
     if (!user)
-      return res.status(401).json({ message: "Email nao encontrado." });
+      return res.status(401).json({ message: "Email ou Password incorretos." });
 
     const isPasswordCorrect = await user.matchPassword(password);
 
     if (!isPasswordCorrect)
-      return res.status(401).json({ message: "Password incorreta." });
+      return res.status(401).json({ message: "Email ou Password incorretos." });
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",
