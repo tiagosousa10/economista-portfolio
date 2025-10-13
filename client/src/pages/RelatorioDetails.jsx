@@ -99,14 +99,6 @@ const RelatorioDetails = () => {
                 <ArrowLeft className="w-4 h-4" />
                 Voltar
               </Link>
-              <div className="h-6 w-px bg-neutral-200 dark:bg-neutral-700" />
-              <Link
-                to="/"
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-              >
-                <Home className="w-4 h-4" />
-                Início
-              </Link>
             </div>
             <button
               onClick={toggleTheme}
