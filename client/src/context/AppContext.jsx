@@ -1,6 +1,5 @@
 import { createContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { api } from "../lib/axios";
 
@@ -9,28 +8,30 @@ export const AppContext = createContext();
 export const AppContextProvider = ({ children }) => {
   const login = async ({ nome, password }) => {
     try {
-      const response = await api.post(
-        `${process.env.API_BASE_URL}/api/auth/login`,
-        {
-          nome,
-          password,
-        }
-      );
+      // Não precisa concatenar baseURL, axios já faz isso
+      const response = await api.post("/api/auth/login", {
+        nome,
+        password,
+      });
 
-      const data = await response.json();
+      // axios retorna data direto em response.data, não precisa de .json()
+      const data = response.data;
 
-      if (!response.ok) {
-        toast.error("Erro ao efetuar login.");
-        return;
-      }
-
+      // Com axios, status 2xx é sucesso, erros vêm em error.response
+      toast.success("Login realizado com sucesso!");
       return data;
     } catch (error) {
-      toast.error("Erro ao efetuar login.");
+      const errorMessage =
+        error.response?.data?.message || "Erro ao efetuar login.";
+      toast.error(errorMessage);
+      console.error("Erro no login:", error);
     }
   };
 
-  const value = {};
+  const value = {
+    login,
+    // Adicione outras funções e estados aqui
+  };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

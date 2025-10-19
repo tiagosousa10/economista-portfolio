@@ -14,38 +14,28 @@ const PORT = process.env.PORT || 3000;
 await connectDB();
 await connectCloudinary();
 
-const allowed = [
-  "https://economista-portfolio-client.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:3000",
+// Configuração de CORS
+const allowedOrigins = [
+  "http://localhost:5173", // Seu Vite local
+  "http://localhost:3000", // Caso acesse direto
+  "https://economista-portfolio-client.vercel.app", // Frontend no Vercel
 ];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
 //middlewares
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      // Permitir requisições sem origin (ex: mobile apps, Postman)
-      if (!origin) return cb(null, true);
-
-      // Permitir origens da lista allowed
-      if (allowed.includes(origin)) return cb(null, true);
-
-      // Em desenvolvimento, permitir localhost
-      if (
-        process.env.NODE_ENV !== "production" &&
-        origin.includes("localhost")
-      ) {
-        return cb(null, true);
-      }
-
-      cb(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-    exposedHeaders: ["Set-Cookie"],
-  })
-);
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 

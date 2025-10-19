@@ -41,11 +41,21 @@ export async function signup(req, res) {
       { expiresIn: "7d" }
     );
 
+    // Debug: log da configuração do cookie
+    console.log("Configurando cookie JWT:", {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
+    });
+
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true, //prevent xss attacks
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", //allow cross-site cookies in production
       secure: process.env.NODE_ENV === "production", //only send cookie over https in production
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, //allow cookie sharing across vercel subdomains
     });
 
     res.status(201).json({
@@ -83,16 +93,29 @@ export async function login(req, res) {
       expiresIn: "7d",
     });
 
+    // Debug: log da configuração do cookie
+    console.log("Configurando cookie JWT:", {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined,
+    });
+
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true, //prevent xss attacks
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", //allow cross-site cookies in production
       secure: process.env.NODE_ENV === "production", //only send cookie over https in production
+      domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined, //allow cookie sharing across vercel subdomains
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: "Login efetuado com sucesso.", user });
+    res.status(200).json({
+      success: true,
+      message: "Login efetuado com sucesso.",
+      user,
+      token, // Enviar token também no body como fallback
+    });
   } catch (error) {
     console.log("Erro ao realizar login.", error);
     res.status(500).json({ message: error.message });
@@ -106,9 +129,24 @@ export async function logout(req, res) {
 
 export async function verify(req, res) {
   try {
-    const token = req.cookies.jwt;
+    // Debug: log dos cookies recebidos
+    console.log("Cookies recebidos:", req.cookies);
+    console.log("Headers recebidos:", req.headers);
+
+    // Tentar obter token dos cookies primeiro
+    let token = req.cookies.jwt;
+
+    // Se não encontrar nos cookies, tentar no header Authorization
+    if (!token && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+        console.log("Token encontrado no header Authorization");
+      }
+    }
 
     if (!token) {
+      console.log("Token não encontrado nem nos cookies nem no header");
       return res
         .status(401)
         .json({ success: false, message: "Token não encontrado" });

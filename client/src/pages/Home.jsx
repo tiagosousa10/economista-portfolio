@@ -913,6 +913,7 @@ export default function EconomistaSiteBase() {
     const fetchRelatorios = async () => {
       try {
         const response = await api.get("api/relatorios");
+        console.log("🚀 ~ fetchRelatorios ~ response:", response);
         if (response.data.success) {
           setRelatorios(response.data.relatorio);
         }
