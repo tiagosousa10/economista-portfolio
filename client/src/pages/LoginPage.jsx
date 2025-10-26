@@ -48,7 +48,6 @@ const LoginPage = () => {
       const response = await api.post("api/auth/login", formData);
 
       if (response.data.success) {
-        // Salvar token no localStorage como fallback
         if (response.data.token) {
           localStorage.setItem("authToken", response.data.token);
         }
