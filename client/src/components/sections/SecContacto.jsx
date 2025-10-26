@@ -21,14 +21,26 @@ export const SecContacto = ({ t, lang }) => {
       setStatus("error");
       return;
     }
+
+    // Validação adicional de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setStatus("error");
+      return;
+    }
+
     setStatus("ok");
     const subject =
       (lang === "pt" ? "Contacto via site — " : "Website contact — ") +
       form.name;
     const body = `${form.message}\n\n— ${form.name}\n${form.email}`;
-    window.location.href = `mailto:vitor17reis@gmail.com?subject=${encodeURIComponent(
+
+    // Construção correta da URL mailto
+    const mailtoUrl = `mailto:vitor17reis@gmail.com?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoUrl;
   };
 
   return (
@@ -115,12 +127,20 @@ export const SecContacto = ({ t, lang }) => {
               <Mail className="w-4 h-4" aria-hidden /> {t("contact.orEmail")}
             </a>
             {status === "ok" && (
-              <span className="text-sm text-green-600 dark:text-green-400">
+              <span
+                className="text-sm text-green-600 dark:text-green-400"
+                role="status"
+                aria-live="polite"
+              >
                 {t("contact.sentOk")}
               </span>
             )}
             {status === "error" && (
-              <span className="text-sm text-red-600 dark:text-red-400">
+              <span
+                className="text-sm text-red-600 dark:text-red-400"
+                role="alert"
+                aria-live="assertive"
+              >
                 {t("contact.sentError")}
               </span>
             )}

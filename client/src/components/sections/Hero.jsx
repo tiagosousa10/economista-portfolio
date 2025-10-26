@@ -1,6 +1,6 @@
 import React from "react";
 import { Download, Newspaper, Linkedin, Github } from "lucide-react";
-import { Container } from "./Container";
+import { Container } from "../layout/Container";
 import { links } from "../../data/links";
 
 export const Hero = ({ t }) => (
