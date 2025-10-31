@@ -19,6 +19,7 @@ const allowedOrigins = [
   "http://localhost:5173", // Seu Vite local
   "http://localhost:3000", // Caso acesse direto
   "https://economista-portfolio-client.vercel.app", // Frontend no Vercel
+  "https://economista-portfolio-client.vercel.app/login", // Frontend no Vercel
 ];
 
 const corsOptions = {
